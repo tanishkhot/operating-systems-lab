@@ -86,6 +86,9 @@ void tenThreads(){
     exit(EXIT_SUCCESS);
 }
 
+
+//Next assignment: Take an input matrix and then add two input matrices
+
 int main() {		
 	tenThreads();
 	return 0;
