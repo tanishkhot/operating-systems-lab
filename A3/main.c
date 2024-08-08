@@ -110,6 +110,8 @@ void nonPreemption(){
     //printing the sorted array
     printf("Sorted array by Arrival Time (AT):\n");
     printArray(rows, cols, matrix);
+    int* completionTimes = (int*)malloc(rows * sizeof(int)); // Array to store process times
+    int* processTimes = (int*)malloc(rows * sizeof(int));
     
     int currentTime = 0;
     for(int i = 0; i < rows; i++){
@@ -117,7 +119,9 @@ void nonPreemption(){
             currentTime = matrix[i][1];
         }
         currentTime += matrix[i][2];
-        matrix[i][3] = currentTime; // update completion time
+        completionTimes[i] = currentTime; // Update completion time
+        processTimes[i] = matrix[i][2]; 
+      //  matrix[i][3] = currentTime; // update completion time
     }
 
     printf("Final order with which processes run: ");
@@ -126,6 +130,10 @@ void nonPreemption(){
     }
     printf("END\n");
     
+    ganttChart(processTimes,rows);
+
+     free(completionTimes);
+    free(processTimes);
     // Free allocated memory
     for (int i = 0; i < rows; i++) {
         free(matrix[i]);
