@@ -43,10 +43,10 @@ void print_buffer()
     }
     printf("\n");
 }
-
 void* producer(void* arg)
 {
     int id = *((int*)arg);
+    free(arg); // Free the dynamically allocated memory
     while (1)
     {
         sleep(rand() % 3); // Simulate variable time for producing an item
@@ -63,9 +63,11 @@ void* producer(void* arg)
     }
     return NULL;
 }
+
 void* consumer(void* arg)
 {
     int id = *((int*)arg);
+    free(arg); // Free the dynamically allocated memory
     while (1)
     {
         sem_wait(&full); // Wait for a full slot
@@ -81,12 +83,11 @@ void* consumer(void* arg)
     }
     return NULL;
 }
+
 int main()
 {
     pthread_t producers[NUM_PRODUCERS];
     pthread_t consumers[NUM_CONSUMERS];
-    int producer_ids[NUM_PRODUCERS];
-    int consumer_ids[NUM_CONSUMERS];
 
     // Initialize semaphores
     sem_init(&empty, 0, BUFFER_SIZE); // Buffer is initially empty
@@ -102,15 +103,17 @@ int main()
     // Create producer threads
     for (int i = 0; i < NUM_PRODUCERS; ++i)
     {
-        producer_ids[i] = i;
-        pthread_create(&producers[i], NULL, producer, &producer_ids[i]);
+        int* id = malloc(sizeof(int)); // Dynamically allocate memory for the ID
+        *id = i; // Assign thread ID
+        pthread_create(&producers[i], NULL, producer, id); // Pass the dynamically allocated ID
     }
 
     // Create consumer threads
     for (int i = 0; i < NUM_CONSUMERS; ++i)
     {
-        consumer_ids[i] = i;
-        pthread_create(&consumers[i], NULL, consumer, &consumer_ids[i]);
+        int* id = malloc(sizeof(int)); // Dynamically allocate memory for the ID
+        *id = i; // Assign thread ID
+        pthread_create(&consumers[i], NULL, consumer, id); // Pass the dynamically allocated ID
     }
 
     // Wait for threads to finish (they won't in this example)
@@ -118,11 +121,11 @@ int main()
     {
         pthread_join(producers[i], NULL);
     }
-    for (int i=0; i<NUM_CONSUMERS; ++i)
+    for (int i = 0; i < NUM_CONSUMERS; ++i)
     {
         pthread_join(consumers[i], NULL);
     }
-    
+
     // Destroy semaphores
     sem_destroy(&empty);
     sem_destroy(&full);
